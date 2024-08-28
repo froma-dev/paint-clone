@@ -103,8 +103,8 @@ async function setMode(newMode) {
     }
 
     if (mode === MODES.LINE) {
-        context.beginPath()
         context.moveTo(startX, startY)
+        imageData = context.getImageData(0, 0, $canvas.width, $canvas.height)
         $lineButton.classList.add('active')
     }
 
@@ -173,12 +173,7 @@ function stopDrawing() {
     $canvas.removeEventListener('mousemove', draw)
 }
 
-function removeLineStroke () {
-    context.clearRect(0, 0, $canvas.width, $canvas.height);
-}
-
 function draw(ev) {
-    console.log(ev)
     if (!isDrawing) return
     const {offsetX, offsetY} = ev
 
@@ -193,13 +188,10 @@ function draw(ev) {
     }
 
     if (mode === MODES.LINE) {
-        //removeLineStroke(startX, startY )
-        context.globalCompositeOperation = 'destination-out'
-        context.clearRect(startX, startY, $canvas.width, $canvas.height);
-        context.globalCompositeOperation = 'source-over'
+        context.putImageData(imageData, 0, 0)
+        context.beginPath()
         context.moveTo(startX, startY)
         context.lineTo(offsetX, offsetY)
-        context.lineWidth = 2
         context.stroke()
 
         ;[lastX, lastY] = [offsetX, offsetY]
@@ -232,7 +224,6 @@ function draw(ev) {
             context.stroke()
         } else if (mode === MODES.RECTANGLE_FILL) {
             context.fillRect(startX, startY, width, height)
-            //context.fill()
         } else if (mode === MODES.ELLIPSE_FILL) {
             context.ellipse(startX, startY, Math.abs(width), Math.abs(height), 0, startAngle, endAngle)
             context.fill()
