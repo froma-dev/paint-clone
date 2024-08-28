@@ -81,20 +81,18 @@ function handleKeyUp(ev) {
 
 function controlZ() {
     if (controlZValues.length > 0) {
-        let prevValue = controlZValues.pop()
-        context.putImageData(prevValue, 0, 0)
+        let currentImageData = context.getImageData(0, 0, $canvas.width, $canvas.height)
+        controlYValues.push(currentImageData)
+        context.putImageData(controlZValues.pop(), 0, 0)
     }
-    console.log('controlZ left: ', controlZValues.length)
 }
 
 function controlY() {
     if (controlYValues.length > 0) {
-        let prevValue = controlYValues.pop()
-        controlZValues.push(prevValue)
-        context.putImageData(prevValue, 0, 0)
+        let currentImageData = context.getImageData(0, 0, $canvas.width, $canvas.height)
+        controlZValues.push(currentImageData)
+        context.putImageData(controlYValues.pop(), 0, 0)
     }
-
-    console.log('controlY left: ', controlYValues.length)
 }
 
 function handleKeyDown(ev) {
@@ -186,7 +184,7 @@ async function setMode(newMode) {
     }
 
     if (mode === MODES.CLEAR) {
-        clearCanvas()
+        if (controlZValues.length > 0) clearCanvas()
         setMode(MODES.DRAW)
     }
 }
@@ -210,6 +208,8 @@ function startDrawing(ev) {
 }
 
 function clearCanvas() {
+    let currentImageData = context.getImageData(0, 0, $canvas.width, $canvas.height)
+    controlZValues.push(currentImageData)
     context.clearRect(0, 0, $canvas.width, $canvas.height)
 }
 
