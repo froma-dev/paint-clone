@@ -37,6 +37,8 @@ let lastX = 0
 let lastY = 0
 let mode = MODES.DRAW
 let imageData
+const controlZValues = []
+const controlYValues = []
 
 // EVENTS
 $canvas.addEventListener('mousedown', startDrawing)
@@ -74,10 +76,36 @@ function clearCoords(ev) {
 
 function handleKeyUp(ev) {
     if (ev.key === 'Shift') isShiftDown = false
+    if (ev.key === 'Control' || ev.key === 'Meta') isControlDown = false
+}
+
+function controlZ() {
+    if (controlZValues.length > 0) {
+        let prevValue = controlZValues.pop()
+        context.putImageData(prevValue, 0, 0)
+    }
+    console.log('controlZ left: ', controlZValues.length)
+}
+
+function controlY() {
+    if (controlYValues.length > 0) {
+        let prevValue = controlYValues.pop()
+        controlZValues.push(prevValue)
+        context.putImageData(prevValue, 0, 0)
+    }
+
+    console.log('controlY left: ', controlYValues.length)
 }
 
 function handleKeyDown(ev) {
     isShiftDown = ev.key === 'Shift'
+
+    if (!isControlDown) {
+        isControlDown = ev.key === 'Control' || ev.key === 'Meta'
+    } else {
+        if (ev.key === 'z') controlZ()
+        else if (ev.key === 'y') controlY()
+    }
 }
 
 async function setMode(newMode) {
@@ -177,6 +205,7 @@ function startDrawing(ev) {
     [lastX, lastY] = [offsetX, offsetY];
 
     imageData = context.getImageData(0, 0, $canvas.width, $canvas.height)
+    controlZValues.push(imageData)
     $canvas.addEventListener('mousemove', draw)
 }
 
