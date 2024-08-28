@@ -25,11 +25,13 @@ const $eraseButton = $('#erase-btn')
 const $pickerButton = $('#picker-btn')
 const $clearButton = $('#clear-btn')
 const $lineButton = $('#line-btn')
+const $coords = $('#coords')
 
 // States
 const context = $canvas.getContext('2d')
 let isDrawing = false
 let isShiftDown = false
+let isControlDown = false
 let startX, startY
 let lastX = 0
 let lastY = 0
@@ -40,6 +42,8 @@ let imageData
 $canvas.addEventListener('mousedown', startDrawing)
 $canvas.addEventListener('mouseup', stopDrawing)
 $canvas.addEventListener('mouseleave', stopDrawing)
+$canvas.addEventListener('mousemove', updateCoords)
+$canvas.addEventListener('mouseleave', clearCoords)
 $colorPicker.addEventListener('change', changeColor)
 
 $rectangleButton.addEventListener('click', () => setMode(MODES.RECTANGLE))
@@ -56,6 +60,18 @@ document.addEventListener('keydown', handleKeyDown)
 document.addEventListener('keyup', handleKeyUp)
 
 // Handlers
+function updateCoords(ev) {
+    let {offsetX, offsetY} = ev
+    if (offsetX < 0) offsetX = 0
+    if (offsetY < 0) offsetY = 0
+
+    $coords.innerText = `${offsetX},${offsetY}`
+}
+
+function clearCoords(ev) {
+    $coords.innerText = ''
+}
+
 function handleKeyUp(ev) {
     if (ev.key === 'Shift') isShiftDown = false
 }
@@ -252,6 +268,6 @@ function saveCanvas() {
 
 setMode(MODES.LINE)
 
-if (typeof window.EyeDropper !== "undefined") {
-    $pickerButton.style.display = 'block'
+if (typeof window.EyeDropper === "undefined") {
+    $pickerButton.setAttribute('disabled', 'true')
 }
