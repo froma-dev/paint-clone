@@ -248,7 +248,6 @@ function draw(ev) {
         return
     }
 
-    // BREAK
     if (mode === MODES.RECTANGLE || mode === MODES.ELLIPSE || mode === MODES.RECTANGLE_FILL || mode === MODES.ELLIPSE_FILL) {
         context.putImageData(imageData, 0, 0)
         let width = offsetX - startX
