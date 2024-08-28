@@ -1,5 +1,4 @@
 const $ = (selector) => document.querySelector(selector)
-const $$ = (selector) => document.querySelectorAll(selector)
 
 const MODES = {
     DRAW: 'draw',
@@ -26,6 +25,9 @@ const $pickerButton = $('#picker-btn')
 const $clearButton = $('#clear-btn')
 const $lineButton = $('#line-btn')
 const $coords = $('#coords')
+const $undoButton = $('#ctrl-z')
+const $redoButton = $('#ctrl-y')
+const $saveButton = $('#save')
 
 // States
 const context = $canvas.getContext('2d')
@@ -58,6 +60,11 @@ $pickerButton.addEventListener('click', () => setMode(MODES.PICKER))
 $clearButton.addEventListener('click', () => setMode(MODES.CLEAR))
 $lineButton.addEventListener('click', () => setMode(MODES.LINE))
 
+// MENU
+$undoButton.addEventListener('click', controlZ)
+$redoButton.addEventListener('click', controlY)
+$saveButton.addEventListener('click', saveCanvas)
+
 document.addEventListener('keydown', handleKeyDown)
 document.addEventListener('keyup', handleKeyUp)
 
@@ -81,16 +88,14 @@ function handleKeyUp(ev) {
 
 function controlZ() {
     if (controlZValues.length > 0) {
-        let currentImageData = context.getImageData(0, 0, $canvas.width, $canvas.height)
-        controlYValues.push(currentImageData)
+        controlYValues.push(getCurrentImageData())
         context.putImageData(controlZValues.pop(), 0, 0)
     }
 }
 
 function controlY() {
     if (controlYValues.length > 0) {
-        let currentImageData = context.getImageData(0, 0, $canvas.width, $canvas.height)
-        controlZValues.push(currentImageData)
+        controlZValues.push(getCurrentImageData())
         context.putImageData(controlYValues.pop(), 0, 0)
     }
 }
@@ -148,6 +153,7 @@ async function setMode(newMode) {
     if (mode === MODES.LINE) {
         context.lineWidth = 2
         $lineButton.classList.add('active')
+        return
     }
 
     if (mode === MODES.ERASE) {
@@ -164,6 +170,7 @@ async function setMode(newMode) {
         context.lineWidth = 2
         context.fillStyle = value
         context.globalCompositeOperation = 'source-over'
+        return
     }
 
     if (mode === MODES.PICKER) {
@@ -198,18 +205,16 @@ function startDrawing(ev) {
     isDrawing = true
     const {offsetX, offsetY} = ev;
 
-    // Set initial coords
     [startX, startY] = [offsetX, offsetY];
     [lastX, lastY] = [offsetX, offsetY];
 
-    imageData = context.getImageData(0, 0, $canvas.width, $canvas.height)
+    imageData = getCurrentImageData()
     controlZValues.push(imageData)
     $canvas.addEventListener('mousemove', draw)
 }
 
 function clearCanvas() {
-    let currentImageData = context.getImageData(0, 0, $canvas.width, $canvas.height)
-    controlZValues.push(currentImageData)
+    controlZValues.push(getCurrentImageData())
     context.clearRect(0, 0, $canvas.width, $canvas.height)
 }
 
@@ -273,29 +278,27 @@ function draw(ev) {
             context.ellipse(startX, startY, Math.abs(width), Math.abs(height), 0, startAngle, endAngle)
             context.fill()
         }
-        return
     }
 }
 
-function saveCanvas() {
-    const imageData = context.getImageData(0, 0, $canvas.width, $canvas.height)
-
-    const canvasSnapshot = document.createElement('canvas')
-    canvasSnapshot.width = $canvas.width
-    canvasSnapshot.height = $canvas.height
-    const canvasSnapshotContext = canvasSnapshot.getContext('2d')
-
-    canvasSnapshotContext.putImageData(imageData, 0, 0)
-
-    const dataURL = canvasSnapshot.toDataURL('image/png')
-
-    // Create a link element to trigger the download
-    const downloadLink = document.createElement('a')
-    downloadLink.href = dataURL
-    downloadLink.download = 'my_masterpiece.png'
+function getCurrentImageData() {
+    return context.getImageData(0, 0, $canvas.width, $canvas.height)
 }
 
-setMode(MODES.LINE)
+function saveCanvas() {
+    $canvas.toBlob((blob) => {
+        const blobUrl = URL.createObjectURL(blob)
+        const downloadLink = document.createElement('a')
+
+        downloadLink.href = blobUrl
+        downloadLink.download = 'masterpiece.webp'
+        downloadLink.click()
+
+        URL.revokeObjectURL(blobUrl)
+    }, 'image/webp')
+}
+
+setMode(MODES.DRAW)
 
 if (typeof window.EyeDropper === "undefined") {
     $pickerButton.setAttribute('disabled', 'true')
