@@ -72,6 +72,7 @@ async function setMode(newMode) {
     if (mode === MODES.DRAW) {
         $drawButton.classList.add('active')
         $canvas.style.cursor = 'crosshair'
+        context.lineWidth = 2
         context.globalCompositeOperation = 'source-over'
         return
     }
@@ -103,8 +104,7 @@ async function setMode(newMode) {
     }
 
     if (mode === MODES.LINE) {
-        context.moveTo(startX, startY)
-        imageData = context.getImageData(0, 0, $canvas.width, $canvas.height)
+        context.lineWidth = 2
         $lineButton.classList.add('active')
     }
 
@@ -230,6 +230,24 @@ function draw(ev) {
         }
         return
     }
+}
+
+function saveCanvas() {
+    const imageData = context.getImageData(0, 0, $canvas.width, $canvas.height)
+
+    const canvasSnapshot = document.createElement('canvas')
+    canvasSnapshot.width = $canvas.width
+    canvasSnapshot.height = $canvas.height
+    const canvasSnapshotContext = canvasSnapshot.getContext('2d')
+
+    canvasSnapshotContext.putImageData(imageData, 0, 0)
+
+    const dataURL = canvasSnapshot.toDataURL('image/png')
+
+    // Create a link element to trigger the download
+    const downloadLink = document.createElement('a')
+    downloadLink.href = dataURL
+    downloadLink.download = 'my_masterpiece.png'
 }
 
 setMode(MODES.LINE)
