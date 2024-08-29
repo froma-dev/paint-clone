@@ -43,10 +43,14 @@ const controlZValues = []
 const controlYValues = []
 
 // EVENTS
-$canvas.addEventListener('mousedown', startDrawing)
+$canvas.addEventListener('mousedown', startDrawingCursor)
 $canvas.addEventListener('mouseup', stopDrawing)
+$canvas.addEventListener('touchstart', startDrawingTouch)
+$canvas.addEventListener('touchend', stopDrawing)
 $canvas.addEventListener('mouseleave', stopDrawing)
+$canvas.addEventListener('touchcancel', stopDrawing)
 $canvas.addEventListener('mousemove', updateCoords)
+$canvas.addEventListener('touchmove', updateCoordsTouch)
 $canvas.addEventListener('mouseleave', clearCoords)
 $colorPicker.addEventListener('change', changeColor)
 
@@ -69,6 +73,21 @@ document.addEventListener('keydown', handleKeyDown)
 document.addEventListener('keyup', handleKeyUp)
 
 // Handlers
+function updateCoordsTouch(ev) {
+    const coords = getTouchCoords(ev.touches[0])
+    updateCoords(coords)
+}
+
+function getTouchCoords(touch) {
+    let startX = touch.clientX - $canvas.offsetLeft + window.scrollX;
+    let startY = touch.clientY - $canvas.offsetTop + window.scrollY;
+
+    return {
+        offsetX: Math.round(startX),
+        offsetY: Math.round(startY),
+    }
+}
+
 function updateCoords(ev) {
     let {offsetX, offsetY} = ev
     if (offsetX < 0) offsetX = 0
@@ -210,7 +229,18 @@ function startDrawing(ev) {
 
     imageData = getCurrentImageData()
     controlZValues.push(imageData)
+}
+
+function startDrawingCursor(ev) {
+    startDrawing(ev)
     $canvas.addEventListener('mousemove', draw)
+}
+
+function startDrawingTouch(ev) {
+    const coords = getTouchCoords(ev.touches[0])
+    startDrawing(coords)
+    $canvas.addEventListener('touchmove', drawTouch)
+    ev.preventDefault()
 }
 
 function clearCanvas() {
@@ -221,6 +251,13 @@ function clearCanvas() {
 function stopDrawing() {
     isDrawing = false
     $canvas.removeEventListener('mousemove', draw)
+    $canvas.removeEventListener('touchmove', drawTouch)
+}
+
+function drawTouch(ev) {
+    const coords = getTouchCoords(ev.touches[0])
+    ev.preventDefault()
+    draw(coords)
 }
 
 function draw(ev) {
