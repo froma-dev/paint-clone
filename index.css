@@ -91,6 +91,7 @@ aside {
 main {
     display: flex;
     grid-area: main;
+    justify-self: flex-start;
     overflow: auto;
     padding: 0.5rem 0 0.5rem 0.5rem;
     box-shadow: inset 2px 2px black;
@@ -100,6 +101,7 @@ footer {
     grid-area: footer;
     display: flex;
     gap: 0.25rem;
+    width: 100vw;
     background-color: silver;
     padding: 0.25rem;
     box-shadow: inset 0 2px #eee;
@@ -126,7 +128,7 @@ footer {
     display: grid;
     justify-content: flex-start;
     grid-template-areas:
-    "header header header"
-    "aside main main"
-    "footer footer footer";
+    "header header header header"
+    "aside main main ."
+    "footer footer footer footer";
 }
