@@ -1,6 +1,6 @@
 # JS Paint - A Simple Paint Clone
 JS Paint is a basic web-based drawing application built using HTML5 Canvas and JavaScript. It provides a set of essential tools for creating simple drawings and illustrations.
-
+**Demo:** https://paint-clone-zeta.vercel.app/
 ## Features
 **Drawing Tools:**
 * Pen (freehand drawing)
